@@ -1,0 +1,6 @@
+"","Study_Hours","GPA","Expected_GPA","Final_Grade","Number.of.sisters.brothers"
+"Study_Hours",1,0.008,0.066,-0.033,0.159
+"GPA",0.008,1,0.658,0.315,0.135
+"Expected_GPA",0.066,0.658,1,0.249,0.085
+"Final_Grade",-0.033,0.315,0.249,1,0.084
+"Number.of.sisters.brothers",0.159,0.135,0.085,0.084,1
