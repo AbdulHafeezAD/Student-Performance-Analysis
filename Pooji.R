@@ -67,3 +67,27 @@ factor_cols <- c(
 )
 
 
+# =========================================
+# Step 4: Rename key columns for easy analysis
+# =========================================
+
+names(student_data)[names(student_data) ==
+                      "Weekly.study.hours"] <- "Study_Hours"
+
+names(student_data)[names(student_data) ==
+                      "Cumulative.grade.point.average.in.the.last.semester...4.00."] <- "GPA"
+
+names(student_data)[names(student_data) ==
+                      "Expected.Cumulative.grade.point.average.in.the.graduation...4.00."] <- "Expected_GPA"
+
+names(student_data)[names(student_data) ==
+                      "GRADE"] <- "Final_Grade"
+
+
+# =========================================
+# Step 5: Save Final Clean Dataset for Team
+# =========================================
+
+write.csv(student_data, "Final_Clean_Student_Data.csv", row.names = FALSE)
+
+
