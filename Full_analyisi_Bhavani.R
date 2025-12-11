@@ -171,4 +171,55 @@ if (all(c("Attendance.to.classes","GPA") %in% names(student_data))) {
   boxplot(as.numeric(GPA) ~ Attendance.to.classes, data = student_data,
           main = "GPA by Attendance", xlab = "Attendance (coded)", ylab = "GPA", col = "lightgray")
   dev.off()
+  
 }
+
+
+
+# -----------------
+# STEP 4: Modelling, standardized coefs & partial R2 (Hafeez/Taslim style)
+# -----------------
+# Purpose: fit linear model, standardized coefficients, save model and tables.
+# Ensure analysis variables are numeric (same as earlier)
+predictors <- c("Study_Hours", "Attendance.to.classes", "Taking.notes.in.classes",
+                "Listening.in.classes", "Preparation.to.midterm.exams.1")
+all_vars <- c("GPA", predictors)
+for (v in intersect(names(student_data), all_vars)) {
+  if (is.factor(student_data[[v]])) {
+    student_data[[v]] <- as.numeric(as.character(student_data[[v]]))
+  }
+}
+
+# Fit main linear model (same formula used by Hafeez/Taslim)
+lm_model <- lm(GPA ~ Study_Hours + Attendance.to.classes + Taking.notes.in.classes +
+                 Listening.in.classes + Preparation.to.midterm.exams.1, data = student_data)
+
+# Save model object
+save(lm_model, file = "report/tables/Bhavani_lm_model.RData")
+
+# Standardized coefficients: scale predictors and response
+std_lm <- lm(scale(GPA) ~ scale(Study_Hours) + scale(Attendance.to.classes) +
+               scale(Taking.notes.in.classes) + scale(Listening.in.classes) +
+               scale(Preparation.to.midterm.exams.1), data = student_data)
+std_coefs <- as.data.frame(coef(summary(std_lm)))
+std_coefs$term <- rownames(std_coefs)
+names(std_coefs)[1:4] <- c("estimate","std.error","t.value","p.value")
+std_coefs <- std_coefs[ , c("term","estimate","std.error","t.value","p.value")]
+write.csv(std_coefs, "report/tables/Bhavani_standardized_coefficients.csv", row.names = FALSE)
+
+# Partial R2 approx (compare full R2 to model without each predictor)
+full_r2 <- summary(lm_model)$r.squared
+partial_R2 <- sapply(predictors, function(p) {
+  others <- setdiff(predictors, p)
+  f <- as.formula(paste("GPA ~", paste(others, collapse = " + ")))
+  m <- lm(f, data = student_data)
+  max(0, full_r2 - summary(m)$r.squared)
+})
+partial_R2_df <- data.frame(predictor = predictors, partial_R2 = round(partial_R2, 4))
+write.csv(partial_R2_df, "report/tables/Bhavani_partial_R2.csv", row.names = FALSE)
+
+# Save one-line summary and model R2
+one_line <- paste0("Linear model: GPA ~ Study_Hours + Attendance + TakingNotes + Listening + ExamPrep; R2 = ",
+                   round(full_r2, 3))
+cat(one_line, file = "report/tables/Bhavani_one_line_summary.txt")
+
