@@ -77,3 +77,98 @@ if ("GRADE" %in% names(student_data))
 
 # Save an intermediate cleaned file for the team (optional)
 write.csv(student_data, "Final_Clean_Student_Data_v2.csv", row.names = FALSE)
+
+
+
+# -----------------
+# STEP 3: Descriptive Statistics 
+# -----------------
+# Purpose: numeric summaries, frequency tables, contingency tables, correlation, simple figures
+
+# (create folders)
+if (!dir.exists("report")) dir.create("report")
+if (!dir.exists("report/tables")) dir.create("report/tables")
+if (!dir.exists("report/figures")) dir.create("report/figures")
+
+# Numeric columns chosen by Zaheer
+numeric_cols <- c("Study_Hours", "GPA", "Expected_GPA", "Final_Grade", "Number.of.sisters.brothers")
+numeric_cols <- numeric_cols[numeric_cols %in% names(student_data)]
+
+# Summary and sd
+if (length(numeric_cols) > 0) {
+  numeric_summary <- data.frame(
+    variable = numeric_cols,
+    mean = sapply(student_data[numeric_cols], function(x) mean(as.numeric(x), na.rm = TRUE)),
+    sd   = sapply(student_data[numeric_cols], function(x) sd(as.numeric(x), na.rm = TRUE)),
+    median = sapply(student_data[numeric_cols], function(x) median(as.numeric(x), na.rm = TRUE)),
+    IQR = sapply(student_data[numeric_cols], function(x) IQR(as.numeric(x), na.rm = TRUE)),
+    min = sapply(student_data[numeric_cols], function(x) min(as.numeric(x), na.rm = TRUE)),
+    max = sapply(student_data[numeric_cols], function(x) max(as.numeric(x), na.rm = TRUE)),
+    n = sapply(student_data[numeric_cols], function(x) sum(!is.na(x))),
+    stringsAsFactors = FALSE
+  )
+  numeric_summary[ , 2:7] <- round(numeric_summary[ , 2:7], 3)
+  write.csv(numeric_summary, file = "report/tables/Bhavani_numeric_summary.csv", row.names = FALSE)
+}
+
+# Frequency tables for a shortlist of categorical vars (same list used by Zaheer)
+cat_vars <- c("Sex", "Student.Age", "Scholarship.type", "Attendance.to.classes",
+              "Taking.notes.in.classes", "Preparation.to.midterm.exams.1")
+cat_vars <- cat_vars[cat_vars %in% names(student_data)]
+
+for (v in cat_vars) {
+  tab <- as.data.frame(table(student_data[[v]], useNA = "ifany"))
+  names(tab) <- c(v, "count")
+  tab$percent <- round(100 * tab$count / sum(tab$count), 1)
+  write.csv(tab, file = paste0("report/tables/Bhavani_freq_", v, ".csv"), row.names = FALSE)
+}
+
+# Contingency examples (Attendance x GPA_cat; Sex x Scholarship row%):
+if ("GPA" %in% names(student_data)) {
+  student_data$GPA_cat <- cut(as.numeric(student_data$GPA),
+                              breaks = c(-Inf, 1.5, 2.5, Inf),
+                              labels = c("Low", "Medium", "High"))
+  ct1 <- table(student_data$Attendance.to.classes, student_data$GPA_cat, useNA = "ifany")
+  ct1_df <- as.data.frame.matrix(ct1)
+  ct1_df <- cbind(Attendance = rownames(ct1_df), ct1_df); rownames(ct1_df) <- NULL
+  write.csv(ct1_df, file = "report/tables/Bhavani_ct_Attendance_GPAcat.csv", row.names = FALSE)
+}
+
+if (all(c("Sex","Scholarship.type") %in% names(student_data))) {
+  ct2 <- prop.table(table(student_data$Sex, student_data$Scholarship.type), margin = 1) * 100
+  ct2_df <- as.data.frame.matrix(round(ct2, 1)); ct2_df <- cbind(Sex = rownames(ct2_df), ct2_df); rownames(ct2_df) <- NULL
+  write.csv(ct2_df, file = "report/tables/Bhavani_ct_Sex_Scholarship_rowpct.csv", row.names = FALSE)
+}
+
+# Correlation matrix (numeric subset)
+num_for_cor <- na.omit(as.data.frame(lapply(student_data[numeric_cols], as.numeric)))
+if (nrow(num_for_cor) >= 2) {
+  cor_mat <- round(cor(num_for_cor), 3)
+  write.csv(as.data.frame(cor_mat), file = "report/tables/Bhavani_correlation_matrix.csv", row.names = TRUE)
+}
+
+# Simple figures (same as Zaheer)
+if ("GPA" %in% names(student_data)) {
+  png(filename = "report/figures/Bhavani_hist_GPA.png", width = 800, height = 600)
+  hist(as.numeric(student_data$GPA), main = "Distribution of GPA", xlab = "GPA (0-4)", ylab = "Frequency",
+       breaks = 8, col = "lightblue", border = "white")
+  dev.off()
+}
+
+if (all(c("Study_Hours","GPA") %in% names(student_data))) {
+  png(filename = "report/figures/Bhavani_scatter_StudyHours_GPA.png", width = 800, height = 600)
+  plot(as.numeric(student_data$Study_Hours), as.numeric(student_data$GPA),
+       main = "Study Hours vs GPA", xlab = "Weekly Study Hours", ylab = "GPA", pch = 19)
+  if (sum(!is.na(student_data$Study_Hours) & !is.na(student_data$GPA)) >= 2) {
+    mod_tmp <- lm(as.numeric(GPA) ~ as.numeric(Study_Hours), data = student_data)
+    abline(mod_tmp, col = "red", lwd = 2)
+  }
+  dev.off()
+}
+
+if (all(c("Attendance.to.classes","GPA") %in% names(student_data))) {
+  png(filename = "report/figures/Bhavani_box_GPA_by_Attendance.png", width = 800, height = 600)
+  boxplot(as.numeric(GPA) ~ Attendance.to.classes, data = student_data,
+          main = "GPA by Attendance", xlab = "Attendance (coded)", ylab = "GPA", col = "lightgray")
+  dev.off()
+}
