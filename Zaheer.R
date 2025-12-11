@@ -200,8 +200,3 @@ dev.off()
 # -----------------------------------------
 save(student_data, numeric_summary, file = "report/tables/Zaheer_summary_workspace.RData")
 
-# -----------------------------------------
-# 3.7 Final message to console
-# -----------------------------------------
-cat("Zaheer - Step 3 complete. Tables saved to report/tables and figures to report/figures.\n")
-
