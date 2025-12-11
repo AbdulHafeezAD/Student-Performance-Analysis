@@ -259,3 +259,27 @@ plot(fitted(lm_model), residuals(lm_model), main = "Residuals vs Fitted (Bhavani
 abline(h = 0, col = "red")
 dev.off()
 
+# -----------------
+# STEP 6: Merge scripts & tidy (final Analysis.R saved) + export git log guidance
+# -----------------
+# Purpose: create final single script (this file), ensure no duplicates and scripts combined.
+
+
+# Save a copy of this full merged script workspace (useful for reproducibility)
+save.image(file = "report/tables/Bhavani_full_workspace.RData")
+
+# Guidance to export git log (run on command line, not inside R)
+cat("
+--- Git instructions (run in your local project root, not inside R) ---
+# Export full git log to file for Appendix B:
+git log --pretty=format:'%h %ad | %s | %an' --date=short > report/tables/GIT_LOG.txt
+
+# To select top 3 commits manually: inspect GIT_LOG.txt and copy the three significant commits with
+# Commit message + explanation (Bhavani will prepare Appendix B).
+----------------------------------------------------------------------
+")
+
+# End of script
+cat('Bhavani merged Analysis.R complete. Check report/tables and report/figures for outputs.\n')
+
+
