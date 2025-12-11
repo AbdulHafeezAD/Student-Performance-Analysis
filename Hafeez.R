@@ -140,3 +140,39 @@ png("report/figures/Hafeez_qqplot.png", width = 800, height = 600)
 qqnorm(resid_vals); qqline(resid_vals, col = "red")
 dev.off()
 
+
+
+# =========================================
+# (Hafeez) - Step 4: Effect sizes, partial R2 approximation & save outputs
+# =========================================
+
+# Standardized coefficients (simple approach: scale variables and re-fit)
+std_lm <- lm(scale(GPA) ~ scale(Study_Hours) + scale(Attendance.to.classes) +
+               scale(Taking.notes.in.classes) + scale(Listening.in.classes) +
+               scale(Preparation.to.midterm.exams.1), data = student_data)
+std_coefs <- as.data.frame(coef(summary(std_lm)))
+std_coefs$term <- rownames(std_coefs)
+names(std_coefs)[1:4] <- c("estimate","std.error","t.value","p.value")
+std_coefs <- std_coefs[ , c("term","estimate","std.error","t.value","p.value")]
+write.csv(std_coefs, "report/tables/Hafeez_standardized_coefficients.csv", row.names = FALSE)
+
+# Partial R2 approx: compare full model R2 to model without each predictor
+full_r2 <- summary(lm_model)$r.squared
+partial_R2 <- sapply(predictors, function(p) {
+  others <- setdiff(predictors, p)
+  f <- as.formula(paste("GPA ~", paste(others, collapse = " + ")))
+  m <- lm(f, data = student_data)
+  max(0, full_r2 - summary(m)$r.squared)
+})
+partial_R2_df <- data.frame(predictor = predictors, partial_R2 = round(partial_R2, 4))
+write.csv(partial_R2_df, "report/tables/Hafeez_partial_R2.csv", row.names = FALSE)
+print(partial_R2_df)
+
+# Save model object (RData) for reproducibility
+save(lm_model, file = "report/tables/Hafeez_lm_model.RData")
+
+# One-line summary saved for quick paste into report
+one_line <- paste0("Linear model: GPA ~ Study_Hours + Attendance + TakingNotes + Listening + ExamPrep; R2 = ",
+                   round(full_r2, 3, digits = 3))
+cat(one_line, file = "report/tables/Hafeez_one_line_summary.txt")
+
