@@ -223,3 +223,39 @@ one_line <- paste0("Linear model: GPA ~ Study_Hours + Attendance + TakingNotes +
                    round(full_r2, 3))
 cat(one_line, file = "report/tables/Bhavani_one_line_summary.txt")
 
+
+# -----------------
+# STEP 5: Hypothesis testing outputs and diagnostics (Taslim-style)
+# -----------------
+# Purpose: collect p-values, decisions, residual checks, and save for appendix
+
+# p-values and decisions
+lm_sum <- summary(lm_model)
+overall_p <- if (!is.null(lm_sum$fstatistic)) {
+  pf(lm_sum$fstatistic[1], lm_sum$fstatistic[2], lm_sum$fstatistic[3], lower.tail = FALSE)
+} else NA
+
+coef_tab <- as.data.frame(coef(summary(lm_model)))
+coef_tab$term <- rownames(coef_tab)
+names(coef_tab)[1:4] <- c("estimate", "std.error", "t.value", "p.value")
+coef_tab <- coef_tab[, c("term", "estimate", "std.error", "t.value", "p.value")]
+alpha <- 0.05
+overall_decision <- if (!is.na(overall_p) && overall_p < alpha) "Reject H0 (overall model significant)" else "Do not reject H0 (overall model not significant)"
+coef_tab$decision <- ifelse(coef_tab$p.value < alpha, "Reject H0 (significant)", "Do not reject H0 (not significant)")
+write.csv(coef_tab, "report/tables/Bhavani_predictor_pvalues.csv", row.names = FALSE)
+write.csv(data.frame(overall_p = overall_p, overall_decision = overall_decision), "report/tables/Bhavani_overall_test_decision.csv", row.names = FALSE)
+
+# Residuals & fitted saved
+resid_df <- data.frame(fitted = fitted(lm_model), residuals = residuals(lm_model))
+write.csv(resid_df, "report/tables/Bhavani_residuals_fitted.csv", row.names = FALSE)
+
+# Shapiro-Wilk (normality) and save output text
+shapiro_res <- tryCatch(shapiro.test(residuals(lm_model)), error = function(e) e)
+capture.output(shapiro_res, file = "report/tables/Bhavani_shapiro_residuals.txt")
+
+# Residuals vs fitted plot
+png("report/figures/Bhavani_resid_vs_fitted.png", width = 800, height = 600)
+plot(fitted(lm_model), residuals(lm_model), main = "Residuals vs Fitted (Bhavani)", xlab = "Fitted values", ylab = "Residuals")
+abline(h = 0, col = "red")
+dev.off()
+
