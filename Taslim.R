@@ -93,3 +93,55 @@ write.csv(data.frame(overall_p = overall_p, overall_decision = overall_decision)
 cat("Overall model p-value:", overall_p, "\nDecision:", overall_decision, "\n\n")
 print(coef_tab)
 
+# =========================================
+# (Taslim) - Step 4: Basic sensitivity checks & diagnostics notes (base-R)
+# =========================================
+
+# Save residuals and fitted (for reference)
+resid_df <- data.frame(fitted = fitted(lm_model), residuals = residuals(lm_model))
+write.csv(resid_df, "report/tables/Taslim_residuals_fitted.csv", row.names = FALSE)
+
+# Shapiro-Wilk (normality of residuals)
+shapiro_res <- tryCatch(shapiro.test(residuals(lm_model)), error = function(e) e)
+capture.output(shapiro_res, file = "report/tables/Taslim_shapiro_residuals.txt")
+
+# Basic heteroscedasticity check: Breusch-Pagan not available in base R,
+# so we provide a simple residuals vs fitted plot and save it for visual check.
+png("report/figures/Taslim_resid_vs_fitted.png", width = 800, height = 600)
+plot(fitted(lm_model), residuals(lm_model), main = "Residuals vs Fitted (Taslim)",
+     xlab = "Fitted values", ylab = "Residuals")
+abline(h = 0, col = "red")
+dev.off()
+
+# Note: If robust SEs or formal BP test are required, run lmtest::bptest and sandwich::vcovHC (requires packages).
+cat("Saved residuals, Shapiro output (if available), and residuals vs fitted plot for visual heteroscedasticity check.\n")
+
+
+# =========================================
+# (Taslim) - Step 5: Write final interpretation file
+# =========================================
+
+# Build textual decision summary (these lines are programmatically constructed from results)
+# We will construct a concise text noting which nulls are rejected based on p-values.
+overall_line <- paste0("Overall model p-value = ", signif(overall_p, 3), "; decision: ", overall_decision, ".")
+
+# Per-predictor lines (only predictors, exclude intercept)
+pred_lines <- apply(coef_tab[coef_tab$term != "(Intercept)", ], 1, function(r) {
+  term <- as.character(r["term"])
+  pval <- as.numeric(r["p.value"])
+  dec <- as.character(r["decision"])
+  paste0(term, ": p = ", signif(pval,3), " (", dec, ")")
+})
+
+summary_text <- c("Section 4.2: Hypothesis testing conclusions (Taslim).",
+                  overall_line,
+                  "Per-predictor results:",
+                  pred_lines,
+                  "",
+                  "Notes: decisions use alpha = 0.05. See Taslim_predictor_pvalues.csv for full coefficients and p-values.")
+# Save as text file for the report author to paraphrase into 100 words
+writeLines(summary_text, con = "report/tables/Taslim_Section4.2_summary_notes.txt")
+
+cat("Taslim: summary notes saved to report/tables/Taslim_Section4.2_summary_notes.txt\n")
+
+

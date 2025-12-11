@@ -1,0 +1,10 @@
+Section 4.2: Hypothesis testing conclusions (Taslim).
+Overall model p-value = 0.119; decision: Do not reject H0 (overall model not significant).
+Per-predictor results:
+Study_Hours: p = 0.598 (Do not reject H0 (not significant))
+Attendance.to.classes: p = 0.0395 (Reject H0 (significant))
+Taking.notes.in.classes: p = 0.155 (Do not reject H0 (not significant))
+Listening.in.classes: p = 0.621 (Do not reject H0 (not significant))
+Preparation.to.midterm.exams.1: p = 0.187 (Do not reject H0 (not significant))
+
+Notes: decisions use alpha = 0.05. See Taslim_predictor_pvalues.csv for full coefficients and p-values.
