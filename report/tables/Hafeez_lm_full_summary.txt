@@ -1,0 +1,23 @@
+
+Call:
+lm(formula = formula_model, data = student_data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.5471 -1.1676  0.1472  0.9883  2.4242 
+
+Coefficients:
+                               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                     3.37736    0.85234   3.962 0.000118 ***
+Study_Hours                    -0.06396    0.12104  -0.528 0.598076    
+Attendance.to.classes          -0.53542    0.25763  -2.078 0.039525 *  
+Taking.notes.in.classes         0.27700    0.19380   1.429 0.155166    
+Listening.in.classes            0.07942    0.16046   0.495 0.621396    
+Preparation.to.midterm.exams.1 -0.23618    0.17801  -1.327 0.186774    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.284 on 139 degrees of freedom
+Multiple R-squared:  0.06046,	Adjusted R-squared:  0.02666 
+F-statistic: 1.789 on 5 and 139 DF,  p-value: 0.119
+
