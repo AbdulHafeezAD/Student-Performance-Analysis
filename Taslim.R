@@ -49,3 +49,47 @@ save(lm_model, file = "report/tables/Taslim_lm_model_used.RData")
 
 # Basic summary printed
 print(summary(lm_model))
+
+
+# =========================================
+# (Taslim) - Step 3: Extract p-values and test decisions (overall & per-predictor)
+# =========================================
+
+# Create output folder if missing
+if (!dir.exists("report/tables")) dir.create("report/tables", recursive = TRUE)
+
+# Overall model F-test p-value (from anova or summary)
+anova_tab <- anova(lm_model)
+# If anova gives the model row first (depends on LM), capture the model p-value via the F-stat in summary
+lm_sum <- summary(lm_model)
+# Overall F-statistic p-value (if present)
+overall_p <- if (!is.null(lm_sum$fstatistic)) {
+  pf_val <- pf(lm_sum$fstatistic[1], lm_sum$fstatistic[2], lm_sum$fstatistic[3], lower.tail = FALSE)
+  pf_val
+} else {
+  NA
+}
+
+# Per-predictor p-values from coef summary
+coef_tab <- as.data.frame(coef(summary(lm_model)))
+coef_tab$term <- rownames(coef_tab)
+names(coef_tab)[1:4] <- c("estimate", "std.error", "t.value", "p.value")
+coef_tab <- coef_tab[, c("term", "estimate", "std.error", "t.value", "p.value")]
+
+# Decision rule: alpha = 0.05
+alpha <- 0.05
+
+# Overall test decision
+overall_decision <- if (!is.na(overall_p) && overall_p < alpha) "Reject H0 (overall model significant)" else "Do not reject H0 (overall model not significant)"
+
+# Per-predictor decisions
+coef_tab$decision <- ifelse(coef_tab$p.value < alpha, "Reject H0 (significant)", "Do not reject H0 (not significant)")
+
+# Save outputs
+write.csv(coef_tab, "report/tables/Taslim_predictor_pvalues.csv", row.names = FALSE)
+write.csv(data.frame(overall_p = overall_p, overall_decision = overall_decision), "report/tables/Taslim_overall_test_decision.csv", row.names = FALSE)
+
+# Print summary to console for quick inspection
+cat("Overall model p-value:", overall_p, "\nDecision:", overall_decision, "\n\n")
+print(coef_tab)
+
