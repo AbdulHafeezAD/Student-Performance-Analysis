@@ -1,0 +1,8 @@
+"","GPA","Study_Hours","Attendance.to.classes","Taking.notes.in.classes","Listening.in.classes","Preparation.to.midterm.exams.1","Final_Grade"
+"GPA",1,0.008,-0.178,0.144,0.055,-0.088,0.315
+"Study_Hours",0.008,1,-0.123,0.163,-0.108,-0.145,-0.033
+"Attendance.to.classes",-0.178,-0.123,1,-0.145,-0.094,-0.127,-0.14
+"Taking.notes.in.classes",0.144,0.163,-0.145,1,-0.025,-0.054,0.045
+"Listening.in.classes",0.055,-0.108,-0.094,-0.025,1,0.038,0.085
+"Preparation.to.midterm.exams.1",-0.088,-0.145,-0.127,-0.054,0.038,1,0.015
+"Final_Grade",0.315,-0.033,-0.14,0.045,0.085,0.015,1
